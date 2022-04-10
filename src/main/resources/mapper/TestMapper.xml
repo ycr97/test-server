@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yy.quality.mapper.TestMapper">
+
+    <insert id="addHealthyIteration">
+        INSERT INTO t_healthy_iteration `(`parent_id`, `finish_rate`, `elements_name`)
+        VALUES (#{parentId}, #{finishRate}, #{elementsName});
+    </insert>
+
+    <select id="getHealthyIterationById" resultType="com.yy.quality.model.HealthyIteration">
+        SELECT id,
+               parent_id     AS parentId,
+               finish_rate   AS finishRate,
+               elements_name AS elementsName
+        FROM t_healthy_iteration
+        WHERE id = #{id}
+    </select>
+
+    <select id="getAllProject" resultType="com.yy.quality.model.Project">
+        SELECT id,
+               product_line AS productLine,
+               target,
+               parent_id    AS parentId,
+               description
+        FROM t_project
+    </select>
+
+
+</mapper>
