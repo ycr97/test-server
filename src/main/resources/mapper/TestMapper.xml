@@ -6,6 +6,21 @@
         INSERT INTO t_healthy_iteration `(`parent_id`, `finish_rate`, `elements_name`)
         VALUES (#{parentId}, #{finishRate}, #{elementsName});
     </insert>
+    <insert id="insertData">
+        insert into t_test(`random`)
+        values
+        <foreach collection="data" item="item" separator=",">
+            (#{item})
+        </foreach>
+    </insert>
+
+    <insert id="insertData1">
+        insert into t_test_copy(`random`)
+        values
+        <foreach collection="data" item="item" separator=",">
+            (#{item})
+        </foreach>
+    </insert>
 
     <select id="getHealthyIterationById" resultType="com.yy.quality.model.HealthyIteration">
         SELECT id,
@@ -23,6 +38,33 @@
                parent_id    AS parentId,
                description
         FROM t_project
+    </select>
+
+    <select id="getAllData" resultType="java.lang.String">
+        select random
+        from t_test limit #{startIndex}, #{pageSize}
+    </select>
+    <select id="getDataTotal" resultType="java.lang.Integer">
+        select count(*)
+        from t_test
+    </select>
+    <select id="getConfig" resultType="com.yy.quality.model.HealthyConfig">
+        select `id`,
+               `index`,
+               `socore`,
+               `min_value`    AS `minValue`,
+               `max_value`    AS `maxValue`,
+               `next_id`      AS `nextId`,
+               `parent_index` AS parentIndex
+        from t_config;
+    </select>
+    <select id="getHealthy" resultType="com.yy.quality.model.HealthyIteration">
+        select `id`            as id,
+               `index`         as `index`,
+               `finish_rate`   as finishRate,
+               `elements_name` as elementsName,
+               `date`          as `date`
+        from t_healthy_iteration
     </select>
 
 

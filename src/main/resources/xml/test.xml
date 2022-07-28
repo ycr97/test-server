@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<province name="四川省">
+    <city name="成都市">
+        <county>金牛区</county>
+    </city>
+    <city name="乐山市">
+        <county>犍为县</county>
+    </city>
+</province>

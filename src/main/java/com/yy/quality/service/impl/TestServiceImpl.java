@@ -3,19 +3,20 @@ package com.yy.quality.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.google.common.collect.Lists;
 import com.yy.quality.common.HttpUtils;
 import com.yy.quality.common.JsonResponse;
 import com.yy.quality.mapper.TestMapper;
-import com.yy.quality.model.HealthyIteration;
-import com.yy.quality.model.Project;
-import com.yy.quality.model.ProjectVo;
+import com.yy.quality.model.*;
 import com.yy.quality.service.TestService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -73,7 +74,7 @@ public class TestServiceImpl implements TestService {
         if (code == 200) {
             JsonResponse<List<ProjectVo>> jsonObject = JSONObject.parseObject(result,
                     new TypeReference<JsonResponse<List<ProjectVo>>>() {
-            });
+                    });
             for (ProjectVo datum : jsonObject.getData()) {
                 System.out.println(datum);
             }
@@ -101,4 +102,88 @@ public class TestServiceImpl implements TestService {
         }
         return result;
     }
+
+    @Override
+    public void insertData() {
+        List<String> data = new ArrayList<>();
+        for (int i = 0; i < 1000; i++) {
+            String uuid = UUID.randomUUID().toString().replaceAll("-", "");
+            data.add(uuid);
+        }
+        List<List<String>> partition = Lists.partition(data, 100);
+        partition.parallelStream().forEach(temp -> {
+            testMapper.insertData(temp);
+        });
+    }
+
+    @Override
+    public void copyData(int pageNum, int pageSize) {
+        getAllData(pageNum, pageSize);
+    }
+
+    void getAllData(int pageNum, int pageSize) {
+        PageResult<List<String>> data = getData(pageNum, pageSize);
+        testMapper.insertData1(data.getData());
+        int total = data.getTotal();
+        int totalPage = total % pageSize == 0 ? total / pageSize : (total / pageSize) + 1;
+        if (pageNum < totalPage) {
+            getAllData(pageNum + 1, pageSize);
+        }
+    }
+
+    PageResult<List<String>> getData(int pageNum, int pageSize) {
+        int starIndex = (pageNum - 1) * pageSize;
+        List<String> allData = testMapper.getAllData(starIndex, pageSize);
+        int total = testMapper.getDataTotal();
+        PageResult<List<String>> result = new PageResult<>();
+        result.setData(allData);
+        result.setPageNum(pageNum);
+        result.setPageSize(pageSize);
+        result.setTotal(total);
+        return result;
+    }
+
+    @Override
+    public HealthyIterationVo getFinalScore() {
+        List<HealthyConfig> allConfig = testMapper.getConfig();
+        List<HealthyIteration> healthyList = testMapper.getHealthy();
+        Map<String, List<HealthyConfig>> configMap =
+                allConfig.stream().collect(Collectors.groupingBy(HealthyConfig::getParentIndex));
+        int score = 0;
+        for (HealthyIteration healthyIteration : healthyList) {
+            String index = healthyIteration.getIndex();
+            double finishRate = healthyIteration.getFinishRate();
+            List<HealthyConfig> configs = configMap.get(index);
+            for (HealthyConfig config : configs) {
+                int standardScore = Integer.parseInt(config.getSocore());
+                if (config.getMinValue() != null) {
+                    int minValue = Integer.parseInt(config.getMinValue());
+                    if (config.getMaxValue() != null) {
+                        int maxValue = Integer.parseInt(config.getMaxValue());
+                        if (finishRate >= minValue && finishRate < maxValue) {
+                            score += standardScore;
+                        }
+                    } else {
+                        if (finishRate >= minValue) {
+                            score += standardScore;
+                        }
+                    }
+                } else {
+                    if (config.getMaxValue() != null) {
+                        int maxValue = Integer.parseInt(config.getMaxValue());
+                        if (finishRate < maxValue) {
+                            score += standardScore;
+                        }
+                    }
+                }
+            }
+
+        }
+        HealthyIterationVo vo = new HealthyIterationVo();
+        vo.setData(healthyList);
+        vo.setFinalScore(score);
+        return vo;
+    }
+
+
 }

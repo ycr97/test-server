@@ -2,6 +2,7 @@ package com.yy.quality.controller;
 
 import com.yy.quality.common.JsonResponse;
 import com.yy.quality.model.HealthyIteration;
+import com.yy.quality.model.HealthyIterationVo;
 import com.yy.quality.model.ProjectVo;
 import com.yy.quality.service.TestService;
 import lombok.extern.slf4j.Slf4j;
@@ -52,5 +53,22 @@ public class TestController {
         return JsonResponse.success(result);
     }
 
+    @GetMapping
+    public JsonResponse<String> insertData() {
+        testService.insertData();
+        return JsonResponse.success("");
+    }
 
+    @GetMapping("/data/{pageNum}/{pageSize}")
+    public JsonResponse<String> copyData(@PathVariable("pageNum") int pageNum,
+                                         @PathVariable("pageSize") int pageSize) {
+        testService.copyData(pageNum, pageSize);
+        return JsonResponse.success("");
+    }
+
+    @GetMapping("/score")
+    public JsonResponse<HealthyIterationVo > getFinalScore() {
+        HealthyIterationVo vo = testService.getFinalScore();
+        return JsonResponse.success(vo);
+    }
 }

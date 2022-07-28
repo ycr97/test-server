@@ -1,6 +1,7 @@
 package com.yy.quality.service;
 
 import com.yy.quality.model.HealthyIteration;
+import com.yy.quality.model.HealthyIterationVo;
 import com.yy.quality.model.ProjectVo;
 import org.apache.ibatis.annotations.Param;
 
@@ -17,4 +18,11 @@ public interface TestService {
     List<ProjectVo> getProjectVo();
 
     ProjectVo remoteCall();
+    void insertData();
+
+    void copyData(int pageNum, int pageSize);
+
+
+    HealthyIterationVo getFinalScore();
+
 }

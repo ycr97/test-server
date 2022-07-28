@@ -16,5 +16,5 @@ mybatis:
 
 logging:
   level:
-    com.yy.quality: info
+    com.yy.quality: debug
   config: classpath:logback.xml
